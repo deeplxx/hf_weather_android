@@ -36,6 +36,7 @@ import okhttp3.Response;
  * 选择区域碎片
  */
 
+@SuppressWarnings("NullableProblems")
 public class ChooseAreaFragment extends Fragment {
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
@@ -79,6 +80,20 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(i);
                     queryCounties();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = countyList.get(i).getWeatherId();
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    } else if (getActivity() instanceof WeatherActivity) {
+                        WeatherActivity activity = (WeatherActivity)getActivity();
+                        activity.weatherId = weatherId;  // !!!!注意，此情况下需要手动更改weatherId！！！！！！！！！！！！！！！！
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefreshLayout.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
@@ -170,6 +185,7 @@ public class ChooseAreaFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                @SuppressWarnings("ConstantConditions")
                 String responseText = response.body().string();
 
                 // 利用网络工具进行查询
@@ -214,6 +230,6 @@ public class ChooseAreaFragment extends Fragment {
             progressDialog.setMessage("正在加载...");
             progressDialog.setCanceledOnTouchOutside(false);
         }
-        progressDialog.show();
+        progressDialog.show();  // 若调用之前的语句发生异常则会意外退出
     }
 }

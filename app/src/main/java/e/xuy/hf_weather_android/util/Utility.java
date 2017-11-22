@@ -2,6 +2,8 @@ package e.xuy.hf_weather_android.util;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +11,7 @@ import org.json.JSONObject;
 import e.xuy.hf_weather_android.db.City;
 import e.xuy.hf_weather_android.db.County;
 import e.xuy.hf_weather_android.db.Province;
+import e.xuy.hf_weather_android.gson.Weather;
 
 /**
  * Created by sumlo on 2017/11/21.
@@ -79,5 +82,19 @@ public class Utility {
             }
         }
         return false;
+    }
+
+    // 利用Gson解析Weather，用JSON查询
+    public static Weather handleWeatherResponse(String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");  // 前两句是查询的意思
+
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherContent, Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
